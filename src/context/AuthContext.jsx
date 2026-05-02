@@ -1,50 +1,69 @@
-import { createContext, useContext, useState } from "react";
-import { users } from "../data/mockData";
+import { createContext, useContext, useState, useEffect } from "react";
+import { authApi } from "../api/auth";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [lockedUntil, setLockedUntil] = useState(null);
+  const [loading, setLoading]         = useState(true);
 
-  const login = (email, password) => {
-    // Check lock
-    if (lockedUntil && new Date() < lockedUntil) {
-      const mins = Math.ceil((lockedUntil - new Date()) / 60000);
-      return { success: false, error: `Account locked. Please try again in ${mins} minute(s).`, locked: true };
-    }
+  // Restore session on page refresh
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) { setLoading(false); return; }
+    authApi.me()
+      .then(({ data }) => {
+        console.log("[Auth] Restored session:", data);
+        setCurrentUser(data);
+      })
+      .catch(() => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-    const user = users.find(u => u.email === email && u.password === password && u.active);
-    if (user) {
-      setFailedAttempts(0);
-      setLockedUntil(null);
+  const login = async (email, password) => {
+    try {
+      const { data } = await authApi.login(email, password);
+      console.log("[Auth] Login response:", data);
+
+      // Handle both response shapes just in case
+      const tokens = data.tokens || data;
+      const access  = tokens.access  || data.access;
+      const refresh = tokens.refresh || data.refresh;
+      const user    = data.user || data;
+
+      if (!access) {
+        console.error("[Auth] No access token in response", data);
+        return { success: false, error: "Login failed. No token received." };
+      }
+
+      localStorage.setItem("access_token",  access);
+      localStorage.setItem("refresh_token", refresh);
       setCurrentUser(user);
+      console.log("[Auth] User set:", user);
       return { success: true, user };
+    } catch (err) {
+      console.error("[Auth] Login error:", err.response?.data);
+      const errData = err.response?.data || {};
+      return {
+        success: false,
+        error:  errData.error || "Login failed. Please try again.",
+        locked: errData.locked || false,
+      };
     }
-
-    // Check for deactivated account
-    const deactivated = users.find(u => u.email === email && !u.active);
-    if (deactivated) {
-      return { success: false, error: "Your account has been deactivated. Contact admin." };
-    }
-
-    const newCount = failedAttempts + 1;
-    setFailedAttempts(newCount);
-    if (newCount >= 3) {
-      const lockTime = new Date(Date.now() + 15 * 60 * 1000);
-      setLockedUntil(lockTime);
-      setFailedAttempts(0);
-      return { success: false, error: "Account locked. Please try again in 15 minutes.", locked: true };
-    }
-    return { success: false, error: `Invalid credentials. ${3 - newCount} attempt(s) remaining.` };
   };
 
-  const logout = () => setCurrentUser(null);
+  const logout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setCurrentUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, failedAttempts }}>
-      {children}
+    <AuthContext.Provider value={{ currentUser, login, logout, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

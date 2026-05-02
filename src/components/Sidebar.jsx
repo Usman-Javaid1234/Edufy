@@ -2,24 +2,24 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, ClipboardList,
-  Star, Users, Bell, LogOut
+  Star, Users, LogOut, Shield
 } from "lucide-react";
 
 const studentLinks = [
-  { to: "/dashboard",   icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/dashboard",   icon: LayoutDashboard, label: "Dashboard"     },
   { to: "/courses",     icon: BookOpen,         label: "Course Catalog" },
-  { to: "/assignments", icon: ClipboardList,    label: "Assignments" },
-  { to: "/grades",      icon: Star,             label: "Grades" },
+  { to: "/assignments", icon: ClipboardList,    label: "Assignments"   },
+  { to: "/grades",      icon: Star,             label: "Grades"        },
 ];
 
 const facultyLinks = [
-  { to: "/faculty",         icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/faculty",         icon: LayoutDashboard, label: "Dashboard"  },
   { to: "/faculty/courses", icon: BookOpen,         label: "My Courses" },
-  { to: "/faculty/grading", icon: ClipboardList,    label: "Grading" },
+  { to: "/faculty/grading", icon: ClipboardList,    label: "Grading"    },
 ];
 
 const adminLinks = [
-  { to: "/admin/users", icon: Users, label: "User Management" },
+  { to: "/admin/users", icon: Users,  label: "User Management" },
 ];
 
 export default function Sidebar() {
@@ -31,6 +31,12 @@ export default function Sidebar() {
     currentUser?.role === "admin"   ? adminLinks   : studentLinks;
 
   const handleLogout = () => { logout(); navigate("/login"); };
+
+  const roleColor = {
+    student: "bg-blue-900/20 text-blue-400 border-blue-800/30",
+    faculty: "bg-purple-900/20 text-purple-400 border-purple-800/30",
+    admin:   "bg-gold-500/10 text-gold-400 border-gold-500/20",
+  };
 
   return (
     <aside className="w-56 min-h-screen bg-navy-800 border-r border-navy-600 flex flex-col">
@@ -50,15 +56,12 @@ export default function Sidebar() {
       {/* Nav */}
       <nav className="flex-1 p-3 space-y-0.5">
         {links.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end
+          <NavLink key={to} to={to} end
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all border ${
                 isActive
-                  ? "bg-gold-500/15 text-gold-400 border border-gold-500/20"
-                  : "text-slate-400 hover:text-white hover:bg-navy-700 border border-transparent"
+                  ? "bg-gold-500/15 text-gold-400 border-gold-500/20"
+                  : "text-slate-400 hover:text-white hover:bg-navy-700 border-transparent"
               }`
             }
           >
@@ -71,16 +74,16 @@ export default function Sidebar() {
       {/* User */}
       <div className="p-3 border-t border-navy-600">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-8 h-8 bg-gold-500/20 rounded-full flex items-center justify-center text-gold-400 text-xs font-bold">
-            {currentUser?.avatar}
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border shrink-0 ${roleColor[currentUser?.role] || roleColor.student}`}>
+            {currentUser?.name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-medium truncate">{currentUser?.name}</p>
             <p className="text-slate-500 text-xs capitalize">{currentUser?.role}</p>
           </div>
+          {currentUser?.role === "admin" && <Shield size={13} className="text-gold-400 shrink-0" />}
         </div>
-        <button
-          onClick={handleLogout}
+        <button onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-red-900/10 transition-all"
         >
           <LogOut size={15} />
