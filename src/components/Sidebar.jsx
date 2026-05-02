@@ -2,14 +2,14 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, ClipboardList,
-  Star, Users, Bell, LogOut, ChevronRight
+  Star, Users, Bell, LogOut
 } from "lucide-react";
 
 const studentLinks = [
-  { to: "/dashboard",    icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/courses",      icon: BookOpen,         label: "Course Catalog" },
-  { to: "/assignments",  icon: ClipboardList,    label: "Assignments" },
-  { to: "/grades",       icon: Star,             label: "Grades" },
+  { to: "/dashboard",   icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/courses",     icon: BookOpen,         label: "Course Catalog" },
+  { to: "/assignments", icon: ClipboardList,    label: "Assignments" },
+  { to: "/grades",      icon: Star,             label: "Grades" },
 ];
 
 const facultyLinks = [
@@ -53,11 +53,12 @@ export default function Sidebar() {
           <NavLink
             key={to}
             to={to}
+            end
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group ${
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? "bg-gold-500/15 text-gold-400 border border-gold-500/20"
-                  : "text-slate-400 hover:text-white hover:bg-navy-700"
+                  : "text-slate-400 hover:text-white hover:bg-navy-700 border border-transparent"
               }`
             }
           >

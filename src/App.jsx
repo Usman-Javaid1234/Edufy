@@ -5,6 +5,9 @@ import StudentDashboard from "./pages/StudentDashboard";
 import Assignments from "./pages/Assignments";
 import SubmitAssignment from "./pages/SubmitAssignment";
 import Grades from "./pages/Grades";
+import FacultyDashboard from "./pages/FacultyDashboard";
+import FacultyCourses from "./pages/FacultyCourses";
+import GradingPanel from "./pages/GradingPanel";
 import Layout from "./components/Layout";
 
 const Placeholder = ({ title }) => (
@@ -12,7 +15,7 @@ const Placeholder = ({ title }) => (
     <div className="text-center">
       <p className="text-2xl mb-2">🚧</p>
       <p className="font-medium text-white">{title}</p>
-      <p className="text-slate-500 text-xs mt-1">Coming in next phase</p>
+      <p className="text-slate-500 text-xs mt-1">Coming soon</p>
     </div>
   </div>
 );
@@ -28,8 +31,9 @@ export default function App() {
           <Route path="/assignments/:id/submit" element={<SubmitAssignment />} />
           <Route path="/grades" element={<Grades />} />
           <Route path="/courses" element={<Layout allowedRoles={["student"]}><Placeholder title="Course Catalog" /></Layout>} />
-          <Route path="/faculty" element={<Layout allowedRoles={["faculty"]}><Placeholder title="Faculty Dashboard" /></Layout>} />
-          <Route path="/faculty/grading" element={<Layout allowedRoles={["faculty"]}><Placeholder title="Grading Panel" /></Layout>} />
+          <Route path="/faculty" element={<FacultyDashboard />} />
+          <Route path="/faculty/courses" element={<FacultyCourses />} />
+          <Route path="/faculty/grading" element={<GradingPanel />} />
           <Route path="/admin/users" element={<Layout allowedRoles={["admin"]}><Placeholder title="User Management" /></Layout>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
